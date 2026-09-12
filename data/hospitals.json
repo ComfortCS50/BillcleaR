@@ -1,0 +1,12 @@
+[
+  {
+    "hospital_id": "",
+    "name": "",
+    "city": "",
+    "state": "TX",
+    "mrf_url": "",
+    "mrf_format": "csv",
+    "verified_working": false,
+    "notes": "Fill in 5-10 pre-vetted hospitals here. Confirm each mrf_url actually loads before relying on it in the demo."
+  }
+]

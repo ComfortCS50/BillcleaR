@@ -1,0 +1,25 @@
+# Secrets — never commit
+.env
+*.env
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+env/
+
+# Data (large downloaded MRFs — don't commit raw dumps)
+data/raw/
+*.csv.gz
+*.json.gz
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Uploaded bills (never commit real patient bill images/PDFs)
+uploads/
