@@ -14,6 +14,20 @@ HackRice 16 (Sept 11–13, 2026) — Healthcare track submission.
    and get a plain-language explanation of what it is, why it's done, and
    side effects.
 
+## Architecture
+
+Gemini runs as an orchestrating agent (function calling / tool use), not a
+set of hardcoded prompts. It has three tools available — extract bill line
+items, look up a hospital's posted price for a procedure, and explain a
+term in plain language — and decides which to call and in what order based
+on what the user asked or uploaded. E.g. uploading a bill triggers
+extraction, then a price lookup and explanation per line item, all in one
+agent run, without the frontend needing separate calls for each step.
+See `app/services/agent_service.py`.
+
+The three individual routes (`/api/hospital`, `/api/bill`, `/api/explain`)
+are kept as direct fallbacks for testing and demo reliability.
+
 ## Sponsor challenges targeted
 
 - Best Use of Gemini API — bill parsing (multimodal extraction), plain-language
