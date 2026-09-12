@@ -1,16 +1,16 @@
-# BillClear :— Hospital Price Transparency & Bill Translator
+# BillClear — Hospital Price Transparency & Bill Translator
 
 HackRice 16 (Sept 11–13, 2026) — Healthcare track submission.
 
 ## What it does
 
-1. **Hospital price lookup** — search a supported hospital + procedure and see
+1. **Hospital price lookup**: search a supported hospital + procedure and see
    the gross charge, cash price, and negotiated rate range from that
    hospital's federally-mandated price transparency file (MRF).
-2. **Bill translator** — upload a photo/PDF of a hospital bill and get each
+2. **Bill translator**:  upload a photo/PDF of a hospital bill and get each
    line item explained in plain language, with a comparison against that
    hospital's own posted prices where available.
-3. **Procedure / medication explainer** — look up a procedure or medication
+3. **Procedure / medication explainer**: look up a procedure or medication
    and get a plain-language explanation of what it is, why it's done, and
    side effects.
 
@@ -30,9 +30,9 @@ are kept as direct fallbacks for testing and demo reliability.
 
 ## Sponsor challenges targeted
 
-- Best Use of Gemini API — bill parsing (multimodal extraction), plain-language
+- Best Use of Gemini API: bill parsing (multimodal extraction), plain-language
   explanations, price-gap narration.
-- Best Use of Tiger Data — normalized hospital price data stored and queried
+- Best Use of Tiger Data: normalized hospital price data stored and queried
   in Postgres/Tiger Data for fast lookups.
 - Best Domain Name from GoDaddy Registry.
 
