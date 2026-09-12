@@ -1,4 +1,4 @@
-# BillClear — Hospital Price Transparency & Bill Translator
+# BillClear :— Hospital Price Transparency & Bill Translator
 
 HackRice 16 (Sept 11–13, 2026) — Healthcare track submission.
 
