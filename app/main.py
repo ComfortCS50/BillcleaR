@@ -18,7 +18,7 @@ app.include_router(agent.router, prefix="/api/agent", tags=["agent"])
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.get("/health")
