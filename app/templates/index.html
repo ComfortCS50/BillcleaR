@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BillClear</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%BE%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563eb'%3E%3Cpath d='M6 3h12v16.5l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2-2 1.2V3z'/%3E%3Cpath d='M8.5 7.5h7v1.4h-7zM8.5 10.6h7V12h-7z' fill='white'/%3E%3C/svg%3E" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -13,24 +13,76 @@
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen">
 
-  <!-- Header / nav -->
-  <header class="bg-slate-900 text-white">
-    <div class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="text-xl">🧾</span>
-          <span class="text-lg font-bold tracking-tight">BillClear</span>
-          <span class="text-[10px] uppercase tracking-wide bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">Beta</span>
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-slate-50 via-white to-blue-50 border-b border-gray-200">
+    <div class="max-w-4xl mx-auto px-6 pt-10 pb-14 md:pt-14 md:pb-16 flex flex-col md:flex-row items-center gap-10">
+      <div class="flex-1 text-center md:text-left">
+        <div class="inline-flex items-center gap-2 mb-5">
+          <span class="flex items-center justify-center w-7 h-7 rounded-md bg-blue-600 text-white">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+              <path d="M6 3h12v16.5l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2-2 1.2V3z"/>
+              <line x1="8.5" y1="7.5" x2="15.5" y2="7.5"/>
+              <line x1="8.5" y1="11" x2="15.5" y2="11"/>
+            </svg>
+          </span>
+          <span class="text-sm font-bold tracking-tight text-slate-900">BillClear</span>
+          <span class="text-[10px] uppercase tracking-wide bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">Beta</span>
         </div>
-        <p class="text-slate-400 text-sm mt-0.5">Understand what your hospital actually charges.</p>
+        <h1 class="text-3xl sm:text-4xl md:text-[2.75rem] font-extrabold tracking-tight text-slate-900 leading-tight">
+          Understand your<br class="hidden md:block" /> hospital bill.
+        </h1>
+        <p class="text-lg text-slate-600 mt-4 max-w-md mx-auto md:mx-0">
+          Look up what a hospital really charges, translate a confusing bill into plain language, and get straight answers about procedures and medications.
+        </p>
       </div>
-      <nav class="hidden sm:flex gap-5 text-sm text-slate-300">
-        <a href="#lookup" class="hover:text-white transition-colors">Price Lookup</a>
-        <a href="#bill" class="hover:text-white transition-colors">Translate Bill</a>
-        <a href="#explain" class="hover:text-white transition-colors">Explain</a>
-      </nav>
+
+      <div class="flex-1 max-w-xs sm:max-w-sm w-full">
+        <svg viewBox="0 0 400 260" class="w-full h-auto" role="img" aria-label="A confusing hospital bill translated into a clear, itemized explanation">
+          <!-- left card: the confusing bill -->
+          <rect x="10" y="10" width="150" height="210" rx="10" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+          <rect x="28" y="30" width="80" height="10" rx="3" fill="#cbd5e1"/>
+          <rect x="28" y="46" width="50" height="6" rx="2" fill="#e2e8f0"/>
+          <line x1="28" y1="62" x2="142" y2="62" stroke="#e2e8f0" stroke-width="1"/>
+          <rect x="28" y="76" width="26" height="9" rx="2" fill="#e2e8f0"/>
+          <rect x="60" y="76" width="70" height="9" rx="2" fill="#cbd5e1"/>
+          <rect x="28" y="97" width="26" height="9" rx="2" fill="#e2e8f0"/>
+          <rect x="60" y="97" width="55" height="9" rx="2" fill="#cbd5e1"/>
+          <rect x="28" y="118" width="26" height="9" rx="2" fill="#e2e8f0"/>
+          <rect x="60" y="118" width="64" height="9" rx="2" fill="#cbd5e1"/>
+          <rect x="28" y="139" width="26" height="9" rx="2" fill="#e2e8f0"/>
+          <rect x="60" y="139" width="45" height="9" rx="2" fill="#cbd5e1"/>
+          <line x1="28" y1="160" x2="142" y2="160" stroke="#e2e8f0" stroke-width="1"/>
+          <text x="142" y="179" text-anchor="end" font-family="ui-sans-serif, system-ui" font-size="9" letter-spacing="1" font-weight="600" fill="#94a3b8">TOTAL</text>
+          <text x="142" y="203" text-anchor="end" font-family="ui-monospace, Menlo, monospace" font-size="20" font-weight="700" fill="#dc2626">$1,284</text>
+          <text x="85" y="238" text-anchor="middle" font-family="ui-sans-serif, system-ui" font-size="11" fill="#94a3b8">Your bill</text>
+
+          <!-- arrow -->
+          <text x="200" y="108" text-anchor="middle" font-family="ui-sans-serif, system-ui" font-size="9" letter-spacing="1.5" font-weight="600" fill="#94a3b8">TRANSLATED</text>
+          <line x1="172" y1="130" x2="219" y2="130" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M212 123 L221 130 L212 137" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <!-- right card: explained clearly -->
+          <rect x="240" y="10" width="150" height="210" rx="10" fill="white" stroke="#c4b5fd" stroke-width="1.5"/>
+          <circle cx="375" cy="25" r="11" fill="#7c3aed"/>
+          <path d="M370 25 L374 29 L381 21" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="258" y="30" width="80" height="10" rx="3" fill="#7c3aed"/>
+          <rect x="258" y="46" width="50" height="6" rx="2" fill="#c4b5fd"/>
+          <line x1="258" y1="62" x2="372" y2="62" stroke="#ede9fe" stroke-width="1"/>
+          <path d="M258 80 L262 84 L268 76" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="276" y="76" width="82" height="9" rx="2" fill="#ddd6fe"/>
+          <path d="M258 105 L262 109 L268 101" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="276" y="101" width="62" height="9" rx="2" fill="#ddd6fe"/>
+          <path d="M258 130 L262 134 L268 126" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="276" y="126" width="72" height="9" rx="2" fill="#ddd6fe"/>
+          <line x1="258" y1="160" x2="372" y2="160" stroke="#ede9fe" stroke-width="1"/>
+          <text x="258" y="179" text-anchor="start" font-family="ui-sans-serif, system-ui" font-size="9" letter-spacing="1" font-weight="600" fill="#a78bfa">FAIR PRICE</text>
+          <rect x="290" y="187" width="70" height="24" rx="12" fill="#ede9fe"/>
+          <text x="325" y="203" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="14" font-weight="700" fill="#6d28d9">$1,284</text>
+          <text x="315" y="238" text-anchor="middle" font-family="ui-sans-serif, system-ui" font-size="11" font-weight="600" fill="#7c3aed">Explained clearly</text>
+        </svg>
+      </div>
     </div>
-  </header>
+  </section>
 
   <main class="max-w-4xl mx-auto p-6 space-y-8">
 
@@ -38,7 +90,16 @@
     <section id="lookup" class="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-blue-500 overflow-hidden">
       <div class="p-6">
         <div class="flex items-center gap-3 mb-1">
-          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-50 text-blue-600 text-lg">🏥</span>
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-50 text-blue-600">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+              <rect x="4" y="3" width="16" height="18" rx="1"/>
+              <line x1="12" y1="7" x2="12" y2="13"/>
+              <line x1="9" y1="10" x2="15" y2="10"/>
+              <line x1="8" y1="17" x2="8" y2="21"/>
+              <line x1="16" y1="17" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </span>
           <h2 class="text-lg font-semibold">Hospital price lookup</h2>
         </div>
         <p class="text-sm text-gray-500 mb-4 ml-12">Search a hospital we've loaded, then look up what it posts for a procedure.</p>
@@ -66,7 +127,15 @@
     <section id="bill" class="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-violet-500 overflow-hidden">
       <div class="p-6">
         <div class="flex items-center gap-3 mb-1">
-          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-violet-50 text-violet-600 text-lg">📄</span>
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-violet-50 text-violet-600">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+              <path d="M6 2h9l3 3v17H6V2z"/>
+              <path d="M15 2v3h3"/>
+              <line x1="9" y1="9" x2="15" y2="9"/>
+              <line x1="9" y1="12.5" x2="15" y2="12.5"/>
+              <line x1="9" y1="16" x2="13" y2="16"/>
+            </svg>
+          </span>
           <h2 class="text-lg font-semibold">Translate your bill</h2>
           <span class="text-[10px] uppercase tracking-wide bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded font-medium">Headline feature</span>
         </div>
@@ -89,7 +158,13 @@
     <section id="explain" class="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-emerald-500 overflow-hidden">
       <div class="p-6">
         <div class="flex items-center gap-3 mb-1">
-          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 text-lg">💬</span>
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+              <path d="M4 5h16v11H8l-4 4V5z"/>
+              <line x1="8" y1="9" x2="16" y2="9"/>
+              <line x1="8" y1="12.5" x2="13" y2="12.5"/>
+            </svg>
+          </span>
           <h2 class="text-lg font-semibold">Explain a procedure or medication</h2>
         </div>
         <p class="text-sm text-gray-500 mb-4 ml-12">Plain-language for patients, clinical detail for providers.</p>
@@ -129,16 +204,23 @@
       </div>`;
     }
 
+    const ICON_WARNING = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0">
+      <path d="M12 3.5 21.5 20h-19L12 3.5z"/><line x1="12" y1="10" x2="12" y2="14.5"/><line x1="12" y1="17" x2="12" y2="17.01"/>
+    </svg>`;
+    const ICON_INFO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0 mt-0.5">
+      <circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="7.5" x2="12" y2="7.51"/>
+    </svg>`;
+
     function errorHTML(text) {
       return `<div class="flex items-center gap-2 text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-        <span>⚠️</span><span>${text}</span>
+        ${ICON_WARNING}<span>${text}</span>
       </div>`;
     }
 
     function financialAssistanceHTML(note) {
       if (!note) return "";
       return `<div class="flex items-start gap-2 text-sm text-teal-900 bg-teal-50 border border-teal-100 rounded-lg px-3 py-2 mt-3">
-        <span>💡</span><span>${note}</span>
+        ${ICON_INFO}<span>${note}</span>
       </div>`;
     }
 
