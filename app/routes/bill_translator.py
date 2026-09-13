@@ -14,6 +14,7 @@ For each line item Gemini extracts from the bill:
 from typing import Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from google.genai.errors import APIError
 
 from app.services import db_service, gemini_service
 
@@ -55,6 +56,8 @@ async def upload_bill(
         raw_items = gemini_service.extract_bill_line_items(contents, mime_type)
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
+    except APIError as exc:
+        raise HTTPException(status_code=502, detail=f"Gemini API error: {exc}")
 
     line_items = []
     for item in raw_items:
@@ -69,8 +72,8 @@ async def upload_bill(
         if description:
             try:
                 explanation = gemini_service.explain(description, mode="patient", lang=lang)
-            except RuntimeError:
-                explanation = ""
+            except (RuntimeError, APIError):
+                explanation = ""  # don't let one bad line item's explanation abort the whole bill
             if price_comparison and charge is not None:
                 price_narrative = gemini_service.narrate_price_gap(charge, price_comparison)
 

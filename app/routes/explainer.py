@@ -8,6 +8,7 @@ itself (not just the frontend), so any API caller sees it.
 """
 
 from fastapi import APIRouter, HTTPException
+from google.genai.errors import APIError
 
 from app.services import gemini_service
 
@@ -24,4 +25,6 @@ def explain(query: str, mode: str = "patient", lang: str = "en"):
         explanation = gemini_service.explain(query, mode, lang)
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
+    except APIError as exc:
+        raise HTTPException(status_code=502, detail=f"Gemini API error: {exc}")
     return {"query": query, "mode": mode, "lang": lang, "explanation": explanation, "disclaimer": DISCLAIMER}

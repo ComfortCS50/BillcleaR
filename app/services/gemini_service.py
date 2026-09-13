@@ -11,10 +11,14 @@ fully-typed `client.models.generate_content()` API rather than the newer
 one available at build time (GEMINI_API_KEY in .env is still the
 placeholder value) -- generate_content is the safer bet for a judged demo.
 
-GEMINI_MODEL defaults to the "gemini-flash-latest" alias (self-updating,
-avoids hardcoding a dated version string that may get deprecated) -- pin a
-specific version in .env once you've confirmed what's enabled for your key
-via `client.models.list()`.
+GEMINI_MODEL defaults to "gemini-3.6-flash", picked by live-testing against
+the real key rather than guessing a name from memory: "gemini-flash-latest"
+(self-updating alias) hit repeated 503 UNAVAILABLE ("high demand") errors --
+client.models.list() confirmed "-latest" is Google's lower-quota
+experimental alias. Fell back to "gemini-2.5-flash" (a GA, non-preview
+model) but that returned 404 NOT_FOUND: "no longer available to new users
+... use models/gemini-3.6-flash" -- so that's what's pinned here. Override
+via GEMINI_MODEL in .env if needed.
 """
 
 import json
@@ -25,7 +29,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
 _client = None
 
@@ -145,10 +149,10 @@ def narrate_price_gap(charge: float, hospital_prices: dict) -> str:
     numbers we already trust, so there's no reason to spend an API call or
     risk a hallucinated dollar figure on it.
     """
-    gross = hospital_prices.get("gross_charge")
-    cash = hospital_prices.get("cash_price")
-    lo = hospital_prices.get("negotiated_min")
-    hi = hospital_prices.get("negotiated_max")
+    gross = hospital_prices.get("hospital_gross_charge")
+    cash = hospital_prices.get("hospital_cash_price")
+    lo = hospital_prices.get("hospital_negotiated_min")
+    hi = hospital_prices.get("hospital_negotiated_max")
 
     if charge is None or (lo is None and hi is None and gross is None):
         return "No comparable hospital-posted price was found for this line item."

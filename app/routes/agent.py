@@ -11,6 +11,7 @@ has issues during your live demo.
 """
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from google.genai.errors import APIError
 from typing import Optional
 
 from app.services.agent_service import run_agent
@@ -26,3 +27,5 @@ async def ask_agent(message: str = Form(...), file: Optional[UploadFile] = File(
         return run_agent(message, file_bytes, mime_type)
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
+    except APIError as exc:
+        raise HTTPException(status_code=502, detail=f"Gemini API error: {exc}")
