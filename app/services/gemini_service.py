@@ -171,3 +171,79 @@ def narrate_price_gap(charge: float, hospital_prices: dict) -> str:
     if cash is not None:
         parts.append(f"Its cash-pay discounted price is ${cash:,.2f}.")
     return " ".join(parts)
+
+
+NEGOTIATION_PLAN_PROMPT = """\
+You are helping a patient prepare to negotiate a hospital bill down, using
+real price-transparency data from that same hospital's own posted files.
+You will receive a JSON object summarizing the total billed amount for the
+line items that could be matched against the hospital's price file, and
+what that file says (gross charge, cash/self-pay price, negotiated rate
+range) for those same items.
+
+Return ONLY a JSON object (no markdown fences, no commentary, no
+surrounding text) with exactly these keys:
+  - "target_amount": a single plain number (no "$" or commas) the patient
+    should ask to pay. Prefer the hospital's own cash/self-pay price when
+    it's provided; otherwise use the low end of the negotiated range.
+    Never suggest a number higher than what the patient was actually
+    billed for those items. If nothing in the data supports a specific
+    number, set this to null.
+  - "target_rationale": one sentence explaining why that number is
+    defensible -- it should reference that this comes from the hospital's
+    own federally-required price transparency file, not a guess. If
+    target_amount is null, explain briefly why no specific number could
+    be determined instead.
+  - "script": 3-5 sentences the patient could read close to verbatim on a
+    phone call with the hospital's billing department, calmly requesting
+    the self-pay/cash rate (or negotiated rate) found in the hospital's
+    own file. Plain language, non-confrontational, something a layperson
+    would actually say out loud -- not legal or technical phrasing.
+  - "financial_assistance_reminder": one sentence reminding the patient to
+    also ask the billing department about financial assistance or charity
+    care eligibility if paying this bill would be a hardship, especially
+    since many hospitals (particularly nonprofits) offer this.
+"""
+
+
+def generate_negotiation_plan(comparison_summary: dict) -> dict | None:
+    """
+    One Gemini call, made once per bill upload (not per line item) after
+    line items have been translated and compared against hospital price
+    data. Produces a structured, linear "negotiation plan": a concrete
+    target number, a phone script, and a financial-assistance reminder.
+
+    `comparison_summary` should look like:
+        {
+            "total_billed": float,
+            "hospital_gross_total": float | None,
+            "hospital_cash_total": float | None,
+            "hospital_negotiated_min_total": float | None,
+            "hospital_negotiated_max_total": float | None,
+            "matched_item_count": int,
+            "total_item_count": int,
+        }
+
+    Returns None (rather than raising) if Gemini's response isn't valid
+    JSON -- the caller should treat a missing plan as "couldn't generate
+    one this time" and simply not render that section.
+    """
+    from google.genai import types
+
+    client = get_client()
+    response = client.models.generate_content(
+        model=GEMINI_MODEL,
+        contents=json.dumps(comparison_summary),
+        config=types.GenerateContentConfig(
+            system_instruction=NEGOTIATION_PLAN_PROMPT,
+            response_mime_type="application/json",
+        ),
+    )
+
+    try:
+        plan = json.loads(response.text)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return None
+    if not isinstance(plan, dict):
+        return None
+    return plan

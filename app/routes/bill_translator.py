@@ -9,6 +9,12 @@ For each line item Gemini extracts from the bill:
   db_service.get_prices()) when hospital_id is one we have loaded
 - translate the line item to plain language via gemini_service.explain()
   (Stage 4's function, reused as-is -- no duplicate prompt logic)
+
+Once every line item is translated and compared, one more Gemini call
+(gemini_service.generate_negotiation_plan) turns the bill-level totals
+into a concrete "negotiation plan": a target dollar amount, a phone
+script, and a financial-assistance reminder -- the payoff of the whole
+upload flow, not a per-line-item afterthought.
 """
 
 from typing import Optional
@@ -27,6 +33,34 @@ FINANCIAL_ASSISTANCE_NOTE = (
     "charity care. Ask the hospital's billing department for a financial "
     "counselor or an ability-to-pay application."
 )
+
+
+def _aggregate_price_comparison(line_items: list[dict]) -> dict:
+    """
+    Roll the per-line-item hospital_price_comparison entries up into one
+    bill-level summary, feeding the single negotiation-plan Gemini call.
+    Only items that actually matched hospital price data (and have a
+    charge) count toward the totals -- an unmatched item has no grounds
+    for a negotiation ask.
+    """
+    matched = [
+        item for item in line_items
+        if item.get("hospital_price_comparison") and item.get("charge") is not None
+    ]
+    gross_values = [m["hospital_price_comparison"]["hospital_gross_charge"] for m in matched if m["hospital_price_comparison"].get("hospital_gross_charge") is not None]
+    cash_values = [m["hospital_price_comparison"]["hospital_cash_price"] for m in matched if m["hospital_price_comparison"].get("hospital_cash_price") is not None]
+    min_values = [m["hospital_price_comparison"]["hospital_negotiated_min"] for m in matched if m["hospital_price_comparison"].get("hospital_negotiated_min") is not None]
+    max_values = [m["hospital_price_comparison"]["hospital_negotiated_max"] for m in matched if m["hospital_price_comparison"].get("hospital_negotiated_max") is not None]
+
+    return {
+        "total_billed": sum(m["charge"] for m in matched) if matched else None,
+        "hospital_gross_total": sum(gross_values) if gross_values else None,
+        "hospital_cash_total": sum(cash_values) if cash_values else None,
+        "hospital_negotiated_min_total": sum(min_values) if min_values else None,
+        "hospital_negotiated_max_total": sum(max_values) if max_values else None,
+        "matched_item_count": len(matched),
+        "total_item_count": len(line_items),
+    }
 
 
 def _price_match(hospital_id: str, code, description: str) -> Optional[dict]:
@@ -94,10 +128,19 @@ async def upload_bill(
             "price_narrative": price_narrative,
         })
 
+    negotiation_plan = None
+    comparison_summary = _aggregate_price_comparison(line_items)
+    if comparison_summary["matched_item_count"] > 0:
+        try:
+            negotiation_plan = gemini_service.generate_negotiation_plan(comparison_summary)
+        except (RuntimeError, APIError):
+            negotiation_plan = None  # bill translation still succeeds without the plan
+
     return {
         "filename": file.filename,
         "hospital_id": hospital_id,
         "line_items": line_items,
         "disclaimer": "This is general information, not medical or billing advice.",
         "financial_assistance_note": FINANCIAL_ASSISTANCE_NOTE,
+        "negotiation_plan": negotiation_plan,
     }

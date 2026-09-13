@@ -29,10 +29,10 @@
           <span class="text-[10px] uppercase tracking-wide bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">Beta</span>
         </div>
         <h1 class="text-3xl sm:text-4xl md:text-[2.75rem] font-extrabold tracking-tight text-slate-900 leading-tight">
-          Understand your<br class="hidden md:block" /> hospital bill.
+          Negotiate your<br class="hidden md:block" /> hospital bill down.
         </h1>
         <p class="text-lg text-slate-600 mt-4 max-w-md mx-auto md:mx-0">
-          Look up what a hospital really charges, translate a confusing bill into plain language, and get straight answers about procedures and medications.
+          Translate your bill, see what the hospital actually accepts, and get a real plan to negotiate it down. Then look up real hospital prices or get a plain-language explanation for any procedure or medication.
         </p>
       </div>
 
@@ -86,6 +86,37 @@
 
   <main class="max-w-4xl mx-auto p-6 space-y-8">
 
+    <!-- Stage 3: bill upload -->
+    <section id="bill" class="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-violet-500 overflow-hidden">
+      <div class="p-6">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-violet-50 text-violet-600">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+              <path d="M6 2h9l3 3v17H6V2z"/>
+              <path d="M15 2v3h3"/>
+              <line x1="9" y1="9" x2="15" y2="9"/>
+              <line x1="9" y1="12.5" x2="15" y2="12.5"/>
+              <line x1="9" y1="16" x2="13" y2="16"/>
+            </svg>
+          </span>
+          <h2 class="text-lg font-semibold">Translate your bill</h2>
+          <span class="text-[10px] uppercase tracking-wide bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded font-medium">Primary feature</span>
+        </div>
+        <p class="text-sm text-gray-500 mb-4 ml-12">Upload a photo or PDF of a bill: each line item gets explained, compared against the hospital's own prices, and turned into a plan to negotiate it down.</p>
+
+        <form id="bill-form" class="space-y-3" onsubmit="uploadBill(event)">
+          <label class="block border-2 border-dashed border-gray-300 rounded-lg p-4 text-center text-sm text-gray-500 hover:border-violet-400 hover:bg-violet-50/40 transition-colors cursor-pointer">
+            <input id="bill-file" type="file" accept="image/*,application/pdf" required class="text-sm w-full" />
+          </label>
+          <input id="bill-hospital-id" type="text" placeholder="Hospital ID (optional, e.g. texas-childrens-main)"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500" />
+          <button type="submit" class="bg-violet-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors">Upload &amp; translate</button>
+        </form>
+        <div id="bill-status" class="text-sm mt-3"></div>
+        <div id="bill-results" class="mt-4 space-y-3 text-sm"></div>
+      </div>
+    </section>
+
     <!-- Stage 2: hospital + procedure search -->
     <section id="lookup" class="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-blue-500 overflow-hidden">
       <div class="p-6">
@@ -120,37 +151,6 @@
           </div>
           <div id="price-results" class="mt-4 text-sm"></div>
         </div>
-      </div>
-    </section>
-
-    <!-- Stage 3: bill upload -->
-    <section id="bill" class="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-violet-500 overflow-hidden">
-      <div class="p-6">
-        <div class="flex items-center gap-3 mb-1">
-          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-violet-50 text-violet-600">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-              <path d="M6 2h9l3 3v17H6V2z"/>
-              <path d="M15 2v3h3"/>
-              <line x1="9" y1="9" x2="15" y2="9"/>
-              <line x1="9" y1="12.5" x2="15" y2="12.5"/>
-              <line x1="9" y1="16" x2="13" y2="16"/>
-            </svg>
-          </span>
-          <h2 class="text-lg font-semibold">Translate your bill</h2>
-          <span class="text-[10px] uppercase tracking-wide bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded font-medium">Headline feature</span>
-        </div>
-        <p class="text-sm text-gray-500 mb-4 ml-12">Upload a photo or PDF of a bill and get each line item explained in plain language.</p>
-
-        <form id="bill-form" class="space-y-3" onsubmit="uploadBill(event)">
-          <label class="block border-2 border-dashed border-gray-300 rounded-lg p-4 text-center text-sm text-gray-500 hover:border-violet-400 hover:bg-violet-50/40 transition-colors cursor-pointer">
-            <input id="bill-file" type="file" accept="image/*,application/pdf" required class="text-sm w-full" />
-          </label>
-          <input id="bill-hospital-id" type="text" placeholder="Hospital ID (optional, e.g. texas-childrens-main)"
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500" />
-          <button type="submit" class="bg-violet-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors">Upload &amp; translate</button>
-        </form>
-        <div id="bill-status" class="text-sm mt-3"></div>
-        <div id="bill-results" class="mt-4 space-y-3 text-sm"></div>
       </div>
     </section>
 
@@ -210,6 +210,9 @@
     const ICON_INFO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 shrink-0 mt-0.5">
       <circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="7.5" x2="12" y2="7.51"/>
     </svg>`;
+    const ICON_TARGET = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+      <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/>
+    </svg>`;
 
     function errorHTML(text) {
       return `<div class="flex items-center gap-2 text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
@@ -221,6 +224,33 @@
       if (!note) return "";
       return `<div class="flex items-start gap-2 text-sm text-teal-900 bg-teal-50 border border-teal-100 rounded-lg px-3 py-2 mt-3">
         ${ICON_INFO}<span>${note}</span>
+      </div>`;
+    }
+
+    function negotiationPlanHTML(plan) {
+      if (!plan) return "";
+      const hasTarget = plan.target_amount !== null && plan.target_amount !== undefined;
+      return `<div class="border-2 border-violet-200 bg-violet-50/50 rounded-2xl p-5 mt-4 fade-in">
+        <div class="flex items-center gap-2 mb-4 text-violet-700">
+          ${ICON_TARGET}
+          <h3 class="text-base font-bold text-violet-900">Your Negotiation Plan</h3>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <div class="text-xs uppercase tracking-wide text-violet-500 font-semibold mb-1">Ask for</div>
+            ${hasTarget
+              ? `<div class="text-2xl font-bold text-violet-900">${money(plan.target_amount)}</div>`
+              : `<div class="text-sm text-violet-700 italic">No specific target could be determined from the matched items.</div>`}
+            ${plan.target_rationale ? `<p class="text-sm text-violet-700 mt-1">${plan.target_rationale}</p>` : ""}
+          </div>
+          ${plan.script ? `<div class="bg-white rounded-lg border border-violet-200 p-3">
+            <div class="text-xs uppercase tracking-wide text-gray-400 font-semibold mb-1">What to say</div>
+            <p class="text-sm text-gray-700 italic">"${plan.script}"</p>
+          </div>` : ""}
+          ${plan.financial_assistance_reminder ? `<div class="flex items-start gap-2 text-sm text-teal-900 bg-teal-50 border border-teal-100 rounded-lg px-3 py-2">
+            ${ICON_INFO}<span>${plan.financial_assistance_reminder}</span>
+          </div>` : ""}
+        </div>
       </div>`;
     }
 
@@ -346,7 +376,9 @@
             ${item.explanation ? `<p class="text-gray-700 mt-3 leading-relaxed">${item.explanation}</p>` : ""}
             ${item.price_narrative ? `<div class="mt-3 text-sm bg-blue-50 border border-blue-100 text-blue-900 rounded-lg px-3 py-2">${item.price_narrative}</div>` : ""}
           </div>
-        `).join("") + financialAssistanceHTML(data.financial_assistance_note);
+        `).join("")
+          + financialAssistanceHTML(data.financial_assistance_note)
+          + negotiationPlanHTML(data.negotiation_plan);
       } catch (e) {
         statusEl.innerHTML = "";
         resultsEl.innerHTML = errorHTML("Upload failed.");
