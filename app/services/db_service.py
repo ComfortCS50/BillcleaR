@@ -185,3 +185,60 @@ def get_prices(hospital_id: str, procedure: str) -> list[dict]:
             {"hospital_id": hospital_id, "procedure": procedure, "pattern": f"%{procedure}%"},
         )
         return [_to_jsonable(dict(row._mapping)) for row in result]
+
+
+_PRICE_COLUMNS_SQL = "hospital_id, hospital_name, code, description, gross_charge, cash_price, negotiated_min, negotiated_max"
+
+
+def get_price_for_bill_item(hospital_id: str, code: str | None, description: str | None) -> list[dict]:
+    """
+    Precise lookup for a single extracted bill line item (used by bill
+    translation's price comparison), as opposed to get_prices()'s broad
+    code-OR-description search for Stage 2's search box.
+
+    Chargemaster codes are NOT unique per item -- the same short code
+    (confirmed in practice: e.g. "90999" matched 41 unrelated rows at one
+    hospital) can label many distinct line items, so matching on code
+    alone and blending the results silently mixes prices from a
+    different, unrelated item. This requires the description to also
+    correspond whenever a code is given, falling back to description-only
+    (never bare code-only) so a collision returns no match rather than a
+    wrong one.
+    """
+    engine = connect()
+    from sqlalchemy import text
+
+    with engine.connect() as conn:
+        if code and description:
+            result = conn.execute(
+                text(f"""
+                    SELECT {_PRICE_COLUMNS_SQL} FROM hospital_prices
+                    WHERE hospital_id = :hospital_id AND code = :code AND description ILIKE :pattern
+                """),
+                {"hospital_id": hospital_id, "code": code, "pattern": f"%{description}%"},
+            )
+            rows = [_to_jsonable(dict(row._mapping)) for row in result]
+            if rows:
+                return rows
+
+        if description:
+            result = conn.execute(
+                text(f"""
+                    SELECT {_PRICE_COLUMNS_SQL} FROM hospital_prices
+                    WHERE hospital_id = :hospital_id AND description ILIKE :pattern
+                """),
+                {"hospital_id": hospital_id, "pattern": f"%{description}%"},
+            )
+            return [_to_jsonable(dict(row._mapping)) for row in result]
+
+        if code:
+            result = conn.execute(
+                text(f"""
+                    SELECT {_PRICE_COLUMNS_SQL} FROM hospital_prices
+                    WHERE hospital_id = :hospital_id AND code = :code
+                """),
+                {"hospital_id": hospital_id, "code": code},
+            )
+            return [_to_jsonable(dict(row._mapping)) for row in result]
+
+        return []

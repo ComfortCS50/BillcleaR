@@ -64,11 +64,12 @@ def _aggregate_price_comparison(line_items: list[dict]) -> dict:
 
 
 def _price_match(hospital_id: str, code, description: str) -> Optional[dict]:
-    lookup_term = (code or description or "").strip()
-    if not lookup_term:
+    code = (code or "").strip() or None
+    description = (description or "").strip() or None
+    if not code and not description:
         return None
     try:
-        rows = db_service.get_prices(hospital_id, lookup_term)
+        rows = db_service.get_price_for_bill_item(hospital_id, code, description)
     except NotImplementedError:
         return None
     if not rows:
