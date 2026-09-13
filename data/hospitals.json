@@ -1,12 +1,112 @@
 [
   {
-    "hospital_id": "",
-    "name": "",
-    "city": "",
+    "hospital_id": "houston-methodist-tmc",
+    "name": "Houston Methodist Hospital (Texas Medical Center)",
+    "city": "Houston",
     "state": "TX",
-    "mrf_url": "",
+    "mrf_url": "https://www.houstonmethodist.org/-/media/files/patient-resources/74110155_the-methodist-hospital_standardcharges.ashx",
     "mrf_format": "csv",
-    "verified_working": false,
-    "notes": "Fill in 5-10 pre-vetted hospitals here. Confirm each mrf_url actually loads before relying on it in the demo."
+    "verified_working": true,
+    "notes": ""
+  },
+  {
+    "hospital_id": "houston-methodist-baytown",
+    "name": "Houston Methodist Baytown Hospital",
+    "city": "Baytown",
+    "state": "TX",
+    "mrf_url": "https://www.houstonmethodist.org/-/media/files/patient-resources/741287015_houston-methodist-baytown-hospital_standardcharges.ashx",
+    "mrf_format": "csv",
+    "verified_working": true,
+    "notes": ""
+  },
+  {
+    "hospital_id": "memorial-hermann-memorial-city",
+    "name": "Memorial Hermann Memorial City Medical Center",
+    "city": "Houston",
+    "state": "TX",
+    "mrf_url": "https://memorialhermann.org/-/media/memorial-hermann/org/files/patients-and-visitors/cms-standard-hospital-charges/741152597_memorial-hermann-memorial-city-medical-center_standardcharges.csv",
+    "mrf_format": "csv",
+    "verified_working": true,
+    "notes": "Content verified as real charge data, not just a loading page"
+  },
+  {
+    "hospital_id": "memorial-hermann-southwest",
+    "name": "Memorial Hermann Southwest Hospital",
+    "city": "Houston",
+    "state": "TX",
+    "mrf_url": "https://memorialhermann.org/-/media/memorial-hermann/org/files/patients-and-visitors/cms-standard-hospital-charges/741152597_memorial-hermann-southwest-hospital_standardcharges.csv",
+    "mrf_format": "csv",
+    "verified_working": true,
+    "notes": ""
+  },
+  {
+    "hospital_id": "baylor-st-lukes-main",
+    "name": "Baylor St. Luke's Medical Center (Main Campus)",
+    "city": "Houston",
+    "state": "TX",
+    "mrf_url": "https://www.commonspirit.org/content/dam/commonspiritorg/en/bslmc/soho/finance/price-transparency/741161938_chi-st-lukes-health-baylor-st-lukes-medical-center_standardcharges.json",
+    "mrf_format": "json",
+    "verified_working": true,
+    "notes": ""
+  },
+  {
+    "hospital_id": "texas-childrens-main",
+    "name": "Texas Children's Hospital (Main Houston Campus)",
+    "city": "Houston",
+    "state": "TX",
+    "mrf_url": "https://www.texaschildrens.org/sites/tc/files/uploads/documents/741100555_texas-childrens-hospital_standardcharges.zip",
+    "mrf_format": "zip",
+    "verified_working": true,
+    "notes": "ZIP archive — needs extraction before parsing; confirm inner file format before writing the loader"
+  },
+  {
+    "hospital_id": "md-anderson",
+    "name": "UT MD Anderson Cancer Center",
+    "city": "Houston",
+    "state": "TX",
+    "mrf_url": "https://www.mdanderson.org/content/dam/mdanderson/documents/patients-and-family/becoming-our-patient/planning-for-care/74-6001118_MD%20Anderson%20Cancer%20Center_StandardCharges.csv",
+    "mrf_format": "csv",
+    "verified_working": true,
+    "notes": ""
+  },
+  {
+    "hospital_id": "harris-health-ben-taub",
+    "name": "Harris Health \u2013 Ben Taub Hospital",
+    "city": "Houston",
+    "state": "TX",
+    "mrf_url": "https://www.harrishealth.org/SiteCollectionDocuments/financials/charge%20description%20master/2026/741536936_Harris-Health-Ben-Taub-Hospital_StandardCharges.zip",
+    "mrf_format": "zip",
+    "verified_working": true,
+    "notes": "ZIP archive (binary confirmed) — needs extraction before parsing"
+  },
+  {
+    "hospital_id": "st-lukes-the-woodlands",
+    "name": "St. Luke's Health \u2013 The Woodlands Hospital",
+    "city": "The Woodlands",
+    "state": "TX",
+    "mrf_url": "https://www.commonspirit.org/content/dam/commonspiritorg/en/stluh/soho/finance/price-transparency/760536234-1942208616_st-lukes-community-health-services-st-lukes-the-woodlands-hospital_standardcharges.json",
+    "mrf_format": "json",
+    "verified_working": true,
+    "notes": ""
+  },
+  {
+    "hospital_id": "st-lukes-the-vintage",
+    "name": "St. Luke's Health \u2013 The Vintage Hospital",
+    "city": "Houston",
+    "state": "TX",
+    "mrf_url": "https://www.commonspirit.org/content/dam/commonspiritorg/en/stluh/soho/finance/price-transparency/263734606-1710314141_st-lukes-hospital-at-the-vintage_standardcharges.json",
+    "mrf_format": "json",
+    "verified_working": true,
+    "notes": ""
+  },
+  {
+    "hospital_id": "st-lukes-sugar-land",
+    "name": "St. Luke's Health \u2013 Sugar Land Hospital",
+    "city": "Sugar Land",
+    "state": "TX",
+    "mrf_url": "https://www.commonspirit.org/content/dam/commonspiritorg/en/stluh/soho/finance/price-transparency/261947374-1659559573_st-lukes-community-development-corporation-sugar-land_standardcharges.json",
+    "mrf_format": "json",
+    "verified_working": true,
+    "notes": "Backup/alternate — not in the primary 10, use if one of the others breaks"
   }
 ]
