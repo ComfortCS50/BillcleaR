@@ -13,6 +13,7 @@ env/
 
 # Data (large downloaded MRFs — don't commit raw dumps)
 data/raw/
+data/mrf_cache/
 *.csv.gz
 *.json.gz
 
@@ -20,6 +21,9 @@ data/raw/
 .DS_Store
 .vscode/
 .idea/
+
+# Local run logs
+*.log
 
 # Uploaded bills (never commit real patient bill images/PDFs)
 uploads/

@@ -14,27 +14,183 @@
       what a procedure or medication actually does.
     </p>
 
-    <!-- TODO Stage 2: hospital + procedure search -->
-    <section class="mb-8">
-      <h2 class="text-lg font-semibold mb-2">Hospital price lookup</h2>
-      <p class="text-sm text-gray-500">Coming soon.</p>
+    <!-- Stage 2: hospital + procedure search -->
+    <section class="mb-8 bg-white rounded-lg shadow p-4">
+      <h2 class="text-lg font-semibold mb-3">Hospital price lookup</h2>
+      <div class="flex gap-2 mb-2">
+        <input id="hospital-search-input" type="text" placeholder="Hospital name, e.g. Memorial Hermann"
+               class="flex-1 border rounded px-3 py-2 text-sm" />
+        <button onclick="searchHospitals()" class="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700">Search</button>
+      </div>
+      <div id="hospital-results" class="text-sm mb-3"></div>
+
+      <div id="procedure-section" class="hidden border-t pt-3 mt-3">
+        <p class="text-sm mb-2">Selected hospital: <strong id="selected-hospital-name"></strong></p>
+        <div class="flex gap-2">
+          <input id="procedure-input" type="text" placeholder="Procedure code or description, e.g. MRI"
+                 class="flex-1 border rounded px-3 py-2 text-sm" />
+          <button onclick="lookupPrices()" class="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700">Look up</button>
+        </div>
+        <div id="price-results" class="mt-3 text-sm"></div>
+      </div>
     </section>
 
-    <!-- TODO Stage 3: bill upload -->
-    <section class="mb-8">
-      <h2 class="text-lg font-semibold mb-2">Translate your bill</h2>
-      <p class="text-sm text-gray-500">Coming soon.</p>
+    <!-- Stage 3: bill upload -->
+    <section class="mb-8 bg-white rounded-lg shadow p-4">
+      <h2 class="text-lg font-semibold mb-3">Translate your bill</h2>
+      <form id="bill-form" class="space-y-2" onsubmit="uploadBill(event)">
+        <input id="bill-file" type="file" accept="image/*,application/pdf" required class="text-sm" />
+        <input id="bill-hospital-id" type="text" placeholder="Hospital ID (optional, e.g. texas-childrens-main)"
+               class="w-full border rounded px-3 py-2 text-sm" />
+        <button type="submit" class="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700">Upload &amp; translate</button>
+      </form>
+      <div id="bill-status" class="text-sm text-gray-500 mt-2"></div>
+      <div id="bill-results" class="mt-3 space-y-3 text-sm"></div>
     </section>
 
-    <!-- TODO Stage 4: procedure / medication explainer -->
-    <section class="mb-8">
-      <h2 class="text-lg font-semibold mb-2">Explain a procedure or medication</h2>
-      <p class="text-sm text-gray-500">Coming soon.</p>
+    <!-- Stage 4: procedure / medication explainer -->
+    <section class="mb-8 bg-white rounded-lg shadow p-4">
+      <h2 class="text-lg font-semibold mb-3">Explain a procedure or medication</h2>
+      <div class="flex gap-2 mb-2">
+        <input id="explain-input" type="text" placeholder="e.g. lisinopril, or MRI with contrast"
+               class="flex-1 border rounded px-3 py-2 text-sm" />
+        <select id="explain-mode" class="border rounded px-2 py-2 text-sm">
+          <option value="patient">Patient</option>
+          <option value="doctor">Doctor</option>
+        </select>
+        <button onclick="explainTerm()" class="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700">Explain</button>
+      </div>
+      <div id="explain-results" class="text-sm"></div>
     </section>
 
     <p class="text-xs text-gray-400 mt-12">
       This tool provides general information, not medical or legal advice.
     </p>
   </main>
+
+  <script>
+    function money(v) {
+      return v === null || v === undefined ? "—" : "$" + Number(v).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    async function searchHospitals() {
+      const name = document.getElementById("hospital-search-input").value.trim();
+      const resultsEl = document.getElementById("hospital-results");
+      resultsEl.textContent = "Searching...";
+      try {
+        const res = await fetch(`/api/hospital/search?name=${encodeURIComponent(name)}`);
+        const data = await res.json();
+        if (!data.results || data.results.length === 0) {
+          resultsEl.innerHTML = '<p class="text-gray-500">No matching hospitals loaded.</p>';
+          return;
+        }
+        resultsEl.innerHTML = data.results.map(h =>
+          `<button class="block text-left w-full px-2 py-1 rounded hover:bg-gray-100" onclick="selectHospital('${h.hospital_id}', '${h.hospital_name.replace(/'/g, "\\'")}')">${h.hospital_name} <span class="text-gray-400">(${h.hospital_id})</span></button>`
+        ).join("");
+      } catch (e) {
+        resultsEl.innerHTML = '<p class="text-red-600">Search failed.</p>';
+      }
+    }
+
+    let selectedHospitalId = null;
+
+    function selectHospital(id, name) {
+      selectedHospitalId = id;
+      document.getElementById("selected-hospital-name").textContent = name;
+      document.getElementById("procedure-section").classList.remove("hidden");
+      document.getElementById("price-results").innerHTML = "";
+    }
+
+    async function lookupPrices() {
+      const procedure = document.getElementById("procedure-input").value.trim();
+      const resultsEl = document.getElementById("price-results");
+      if (!selectedHospitalId || !procedure) return;
+      resultsEl.textContent = "Looking up...";
+      try {
+        const res = await fetch(`/api/hospital/${encodeURIComponent(selectedHospitalId)}/prices?procedure=${encodeURIComponent(procedure)}`);
+        const data = await res.json();
+        if (!data.prices || data.prices.length === 0) {
+          resultsEl.innerHTML = '<p class="text-gray-500">No matching procedure found for this hospital.</p>';
+          return;
+        }
+        const s = data.summary;
+        let html = `<div class="bg-gray-50 border rounded p-2 mb-2">
+          <p><strong>${s.match_count}</strong> matching item(s)</p>
+          <p>Gross charge: ${s.gross_charge_range ? money(s.gross_charge_range[0]) + " – " + money(s.gross_charge_range[1]) : "—"}</p>
+          <p>Cash price: ${s.cash_price_range ? money(s.cash_price_range[0]) + " – " + money(s.cash_price_range[1]) : "—"}</p>
+          <p>Negotiated range: ${money(s.negotiated_min)} – ${money(s.negotiated_max)}</p>
+        </div>`;
+        html += data.prices.slice(0, 10).map(p =>
+          `<div class="border-b py-1"><span class="font-mono text-xs text-gray-500">${p.code || "—"}</span> ${p.description}</div>`
+        ).join("");
+        resultsEl.innerHTML = html;
+      } catch (e) {
+        resultsEl.innerHTML = '<p class="text-red-600">Lookup failed.</p>';
+      }
+    }
+
+    async function uploadBill(event) {
+      event.preventDefault();
+      const fileInput = document.getElementById("bill-file");
+      const hospitalId = document.getElementById("bill-hospital-id").value.trim();
+      const statusEl = document.getElementById("bill-status");
+      const resultsEl = document.getElementById("bill-results");
+      if (!fileInput.files.length) return;
+
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+      if (hospitalId) formData.append("hospital_id", hospitalId);
+
+      statusEl.textContent = "Uploading and analyzing bill... (this can take a bit)";
+      resultsEl.innerHTML = "";
+      try {
+        const res = await fetch("/api/bill/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        if (!res.ok) {
+          statusEl.textContent = "";
+          resultsEl.innerHTML = `<p class="text-red-600">${data.detail || "Upload failed."}</p>`;
+          return;
+        }
+        statusEl.textContent = "";
+        if (!data.line_items || data.line_items.length === 0) {
+          resultsEl.innerHTML = '<p class="text-gray-500">No line items could be extracted from this file.</p>';
+          return;
+        }
+        resultsEl.innerHTML = data.line_items.map(item => `
+          <div class="border rounded p-3">
+            <div class="flex justify-between">
+              <span class="font-medium">${item.description || "(no description)"}</span>
+              <span>${item.charge !== null ? money(item.charge) : ""}</span>
+            </div>
+            ${item.code ? `<div class="text-xs text-gray-400 font-mono">${item.code}</div>` : ""}
+            ${item.explanation ? `<p class="text-gray-700 mt-1">${item.explanation}</p>` : ""}
+            ${item.price_narrative ? `<p class="text-blue-700 mt-1">${item.price_narrative}</p>` : ""}
+          </div>
+        `).join("");
+      } catch (e) {
+        statusEl.textContent = "";
+        resultsEl.innerHTML = '<p class="text-red-600">Upload failed.</p>';
+      }
+    }
+
+    async function explainTerm() {
+      const query = document.getElementById("explain-input").value.trim();
+      const mode = document.getElementById("explain-mode").value;
+      const resultsEl = document.getElementById("explain-results");
+      if (!query) return;
+      resultsEl.textContent = "Thinking...";
+      try {
+        const res = await fetch(`/api/explain?query=${encodeURIComponent(query)}&mode=${mode}`);
+        const data = await res.json();
+        if (!res.ok) {
+          resultsEl.innerHTML = `<p class="text-red-600">${data.detail || "Explain failed."}</p>`;
+          return;
+        }
+        resultsEl.innerHTML = `<p class="text-gray-800">${data.explanation}</p><p class="text-xs text-gray-400 mt-2">${data.disclaimer}</p>`;
+      } catch (e) {
+        resultsEl.innerHTML = '<p class="text-red-600">Explain failed.</p>';
+      }
+    }
+  </script>
 </body>
 </html>

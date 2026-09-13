@@ -10,7 +10,7 @@ after the agent is wired up, and give you a fallback if the agent loop
 has issues during your live demo.
 """
 
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from typing import Optional
 
 from app.services.agent_service import run_agent
@@ -22,4 +22,7 @@ router = APIRouter()
 async def ask_agent(message: str = Form(...), file: Optional[UploadFile] = File(None)):
     file_bytes = await file.read() if file else None
     mime_type = file.content_type if file else None
-    return run_agent(message, file_bytes, mime_type)
+    try:
+        return run_agent(message, file_bytes, mime_type)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))

@@ -96,18 +96,28 @@ def _dispatch(tool_name: str, args: dict, file_bytes: bytes | None = None, mime_
 # ---------------------------------------------------------------------------
 # 3. The agent loop.
 #
-# TODO (confirm exact SDK syntax against current Gemini function-calling
-# docs before relying on this):
-#   1. Send `user_message` (+ file, if any) and TOOL_DECLARATIONS to Gemini.
-#   2. If the response contains a function_call part:
-#        - run _dispatch(name, args, file_bytes, mime_type)
-#        - send the result back to Gemini as a function_response part
-#        - repeat (cap at MAX_STEPS so a bad loop can't run forever)
-#   3. Once Gemini returns plain text (no more function_call parts),
-#      return that as the final answer.
+# Built against the installed google-genai SDK (2.23.0), verified by directly
+# introspecting types.FunctionDeclaration / types.Tool / types.Part /
+# types.FunctionResponse offline rather than trusting docs/memory (the exact
+# call surface shifts between SDK versions). Uses the same stable
+# `generate_content` API as gemini_service.py, not the newer `interactions`
+# API -- see that module's docstring for why.
 # ---------------------------------------------------------------------------
 
 MAX_STEPS = 5
+
+AGENT_SYSTEM_INSTRUCTION = (
+    "You are BillClear's assistant. You help patients understand a hospital "
+    "bill they uploaded, look up what a hospital's own posted prices say "
+    "about a procedure, and explain medical procedures/medications in plain "
+    "language. Use the available tools rather than answering from your own "
+    "knowledge when a tool applies -- e.g. always call lookup_hospital_price "
+    "before claiming what a hospital charges, and always call "
+    "extract_bill_line_items first if the user uploaded a bill. Once you "
+    "have what you need from tools, give one clear final answer in plain "
+    "language, and always note this is general information, not medical "
+    "or legal advice."
+)
 
 
 def run_agent(user_message: str, file_bytes: bytes | None = None, mime_type: str | None = None) -> dict:
@@ -120,7 +130,39 @@ def run_agent(user_message: str, file_bytes: bytes | None = None, mime_type: str
     `tool_calls` is worth surfacing in the UI/demo — it's the visible proof
     the agent (not a hardcoded if/else) decided the sequence.
     """
-    raise NotImplementedError(
-        "Wire this up against the current Gemini function-calling API. "
-        "TOOL_DECLARATIONS and _dispatch() above are ready to use as-is."
-    )
+    from google.genai import types
+
+    client = gemini_service.get_client()
+    tool = types.Tool(function_declarations=[types.FunctionDeclaration(**decl) for decl in TOOL_DECLARATIONS])
+    config = types.GenerateContentConfig(system_instruction=AGENT_SYSTEM_INSTRUCTION, tools=[tool])
+
+    parts = []
+    if file_bytes:
+        parts.append(types.Part.from_bytes(data=file_bytes, mime_type=mime_type or "application/octet-stream"))
+    parts.append(types.Part(text=user_message))
+    contents = [types.Content(role="user", parts=parts)]
+
+    tool_calls_log: list[str] = []
+
+    for _ in range(MAX_STEPS):
+        response = client.models.generate_content(model=gemini_service.GEMINI_MODEL, contents=contents, config=config)
+        calls = response.function_calls or []
+        if not calls:
+            return {"answer": (response.text or "").strip(), "tool_calls": tool_calls_log}
+
+        contents.append(response.candidates[0].content)
+
+        response_parts = []
+        for call in calls:
+            tool_calls_log.append(call.name)
+            try:
+                result = _dispatch(call.name, dict(call.args or {}), file_bytes, mime_type)
+            except Exception as exc:  # surface the failure to Gemini so it can recover/apologize instead of crashing the request
+                result = {"error": str(exc)}
+            response_parts.append(types.Part(function_response=types.FunctionResponse(name=call.name, response={"result": result})))
+        contents.append(types.Content(role="user", parts=response_parts))
+
+    return {
+        "answer": "Reached the max number of tool-call steps without a final answer. Please try rephrasing your question.",
+        "tool_calls": tool_calls_log,
+    }
