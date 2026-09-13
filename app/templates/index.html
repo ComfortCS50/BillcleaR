@@ -289,20 +289,10 @@
       document.getElementById("procedure-input").focus();
     }
 
-    async function lookupPrices() {
-      const procedure = document.getElementById("procedure-input").value.trim();
-      const resultsEl = document.getElementById("price-results");
-      if (!selectedHospitalId || !procedure) return;
-      resultsEl.innerHTML = loadingHTML("Looking up...");
-      try {
-        const res = await fetch(`/api/hospital/${encodeURIComponent(selectedHospitalId)}/prices?procedure=${encodeURIComponent(procedure)}`);
-        const data = await res.json();
-        if (!data.prices || data.prices.length === 0) {
-          resultsEl.innerHTML = '<p class="text-gray-500 py-1">No matching procedure found for this hospital.</p>';
-          return;
-        }
-        const s = data.summary;
-        let html = `<div class="grid grid-cols-3 gap-2 mb-4">
+    let currentPriceData = null;
+
+    function priceAggregateHTML(s) {
+      return `<div class="grid grid-cols-3 gap-2">
           <div class="bg-gray-50 rounded-lg p-3 text-center">
             <div class="text-[10px] uppercase tracking-wide text-gray-400 mb-1">Gross charge</div>
             <div class="text-sm font-semibold">${s.gross_charge_range ? money(s.gross_charge_range[0]) + " – " + money(s.gross_charge_range[1]) : "—"}</div>
@@ -315,17 +305,76 @@
             <div class="text-[10px] uppercase tracking-wide text-gray-400 mb-1">Negotiated range</div>
             <div class="text-sm font-semibold">${money(s.negotiated_min)} – ${money(s.negotiated_max)}</div>
           </div>
+        </div>
+        <p class="text-xs text-gray-400 mt-2">Blended range across ${s.match_count} matching item(s) — click one below to see its own price.</p>`;
+    }
+
+    function priceItemHTML(item) {
+      return `<div class="flex items-center justify-between gap-2 mb-2">
+          <p class="text-sm text-gray-700 truncate">
+            <span class="font-medium">${item.description}</span>${item.code ? ` <span class="font-mono text-xs text-gray-400">(${item.code})</span>` : ""}
+          </p>
+          <button type="button" onclick="showPriceAggregate()" class="text-xs text-blue-600 hover:underline shrink-0">Show overall range</button>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="bg-blue-50 rounded-lg p-3 text-center">
+            <div class="text-[10px] uppercase tracking-wide text-blue-400 mb-1">Gross charge</div>
+            <div class="text-sm font-semibold text-blue-900">${money(item.gross_charge)}</div>
+          </div>
+          <div class="bg-blue-50 rounded-lg p-3 text-center">
+            <div class="text-[10px] uppercase tracking-wide text-blue-400 mb-1">Cash price</div>
+            <div class="text-sm font-semibold text-blue-900">${money(item.cash_price)}</div>
+          </div>
+          <div class="bg-blue-50 rounded-lg p-3 text-center">
+            <div class="text-[10px] uppercase tracking-wide text-blue-400 mb-1">Negotiated range</div>
+            <div class="text-sm font-semibold text-blue-900">${money(item.negotiated_min)} – ${money(item.negotiated_max)}</div>
+          </div>
         </div>`;
-        html += `<p class="text-xs text-gray-400 mb-2">${s.match_count} matching item(s)${data.prices.length > 10 ? ", showing first 10" : ""}</p>`;
-        html += '<div class="space-y-1.5">' + data.prices.slice(0, 10).map(p =>
-          `<div class="flex justify-between items-baseline gap-3 border border-gray-100 rounded-lg px-3 py-2 hover:bg-gray-50">
+    }
+
+    function selectPriceMatch(index) {
+      if (!currentPriceData) return;
+      const item = currentPriceData.prices[index];
+      if (!item) return;
+      document.getElementById("price-summary-box").innerHTML = priceItemHTML(item);
+      document.querySelectorAll(".price-match-item").forEach(el => {
+        el.classList.toggle("bg-blue-50", Number(el.dataset.idx) === index);
+        el.classList.toggle("border-blue-300", Number(el.dataset.idx) === index);
+      });
+    }
+
+    function showPriceAggregate() {
+      if (!currentPriceData) return;
+      document.getElementById("price-summary-box").innerHTML = priceAggregateHTML(currentPriceData.summary);
+      document.querySelectorAll(".price-match-item").forEach(el => el.classList.remove("bg-blue-50", "border-blue-300"));
+    }
+
+    async function lookupPrices() {
+      const procedure = document.getElementById("procedure-input").value.trim();
+      const resultsEl = document.getElementById("price-results");
+      if (!selectedHospitalId || !procedure) return;
+      resultsEl.innerHTML = loadingHTML("Looking up...");
+      try {
+        const res = await fetch(`/api/hospital/${encodeURIComponent(selectedHospitalId)}/prices?procedure=${encodeURIComponent(procedure)}`);
+        const data = await res.json();
+        if (!data.prices || data.prices.length === 0) {
+          currentPriceData = null;
+          resultsEl.innerHTML = '<p class="text-gray-500 py-1">No matching procedure found for this hospital.</p>';
+          return;
+        }
+        currentPriceData = data;
+        let html = `<div id="price-summary-box" class="mb-3 fade-in">${priceAggregateHTML(data.summary)}</div>`;
+        html += `<p class="text-xs text-gray-400 mb-2">${data.summary.match_count} matching item(s)${data.prices.length > 10 ? ", showing first 10" : ""}</p>`;
+        html += '<div class="space-y-1.5">' + data.prices.slice(0, 10).map((p, i) =>
+          `<button type="button" onclick="selectPriceMatch(${i})" data-idx="${i}" class="price-match-item w-full text-left flex justify-between items-baseline gap-3 border border-gray-100 rounded-lg px-3 py-2 hover:bg-blue-50 hover:border-blue-200 transition-colors">
              <span class="text-gray-700">${p.description}</span>
              <span class="font-mono text-xs text-gray-400 shrink-0">${p.code || "—"}</span>
-           </div>`
+           </button>`
         ).join("") + '</div>';
         html += financialAssistanceHTML(data.financial_assistance_note);
         resultsEl.innerHTML = html;
       } catch (e) {
+        currentPriceData = null;
         resultsEl.innerHTML = errorHTML("Lookup failed.");
       }
     }
