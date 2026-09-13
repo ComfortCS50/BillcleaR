@@ -111,8 +111,10 @@
           <label class="block border-2 border-dashed border-gray-300 rounded-lg p-4 text-center text-sm text-gray-500 hover:border-violet-400 hover:bg-violet-50/40 transition-colors cursor-pointer">
             <input id="bill-file" type="file" accept="image/*,application/pdf" required class="text-sm w-full" />
           </label>
-          <input id="bill-hospital-id" type="text" placeholder="Hospital ID (optional, e.g. texas-childrens-main)"
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500" />
+          <select id="bill-hospital-id"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white">
+            <option value="">No hospital selected (skip price comparison)</option>
+          </select>
           <button type="submit" class="bg-violet-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors">Upload &amp; translate</button>
         </form>
         <div id="bill-status" class="text-sm mt-3"></div>
@@ -458,6 +460,25 @@
         resultsEl.innerHTML = errorHTML("Explain failed.");
       }
     }
+
+    async function loadBillHospitalOptions() {
+      const select = document.getElementById("bill-hospital-id");
+      try {
+        const res = await fetch("/api/hospital/search?name=");
+        const data = await res.json();
+        const hospitals = (data.results || []).slice().sort((a, b) => a.hospital_name.localeCompare(b.hospital_name));
+        for (const h of hospitals) {
+          const opt = document.createElement("option");
+          opt.value = h.hospital_id;
+          opt.textContent = h.hospital_name;
+          select.appendChild(opt);
+        }
+      } catch (e) {
+        // Dropdown just keeps its "no hospital selected" default -- price
+        // comparison is optional, so this failing shouldn't block upload.
+      }
+    }
+    loadBillHospitalOptions();
   </script>
 </body>
 </html>
