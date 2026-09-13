@@ -4,66 +4,115 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BillClear</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%BE%3C/text%3E%3C/svg%3E" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fade-in .2s ease-out; }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
-  <main class="max-w-2xl mx-auto p-6">
-    <h1 class="text-2xl font-bold mb-2">BillClear</h1>
-    <p class="text-gray-600 mb-6">
-      Look up hospital prices, translate a confusing bill, and understand
-      what a procedure or medication actually does.
-    </p>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+
+  <!-- Header / nav -->
+  <header class="bg-slate-900 text-white">
+    <div class="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🧾</span>
+          <span class="text-lg font-bold tracking-tight">BillClear</span>
+          <span class="text-[10px] uppercase tracking-wide bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">Beta</span>
+        </div>
+        <p class="text-slate-400 text-sm mt-0.5">Understand what your hospital actually charges.</p>
+      </div>
+      <nav class="hidden sm:flex gap-5 text-sm text-slate-300">
+        <a href="#lookup" class="hover:text-white transition-colors">Price Lookup</a>
+        <a href="#bill" class="hover:text-white transition-colors">Translate Bill</a>
+        <a href="#explain" class="hover:text-white transition-colors">Explain</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-6 space-y-8">
 
     <!-- Stage 2: hospital + procedure search -->
-    <section class="mb-8 bg-white rounded-lg shadow p-4">
-      <h2 class="text-lg font-semibold mb-3">Hospital price lookup</h2>
-      <div class="flex gap-2 mb-2">
-        <input id="hospital-search-input" type="text" placeholder="Hospital name, e.g. Memorial Hermann"
-               class="flex-1 border rounded px-3 py-2 text-sm" />
-        <button onclick="searchHospitals()" class="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700">Search</button>
-      </div>
-      <div id="hospital-results" class="text-sm mb-3"></div>
-
-      <div id="procedure-section" class="hidden border-t pt-3 mt-3">
-        <p class="text-sm mb-2">Selected hospital: <strong id="selected-hospital-name"></strong></p>
-        <div class="flex gap-2">
-          <input id="procedure-input" type="text" placeholder="Procedure code or description, e.g. MRI"
-                 class="flex-1 border rounded px-3 py-2 text-sm" />
-          <button onclick="lookupPrices()" class="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700">Look up</button>
+    <section id="lookup" class="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-blue-500 overflow-hidden">
+      <div class="p-6">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-50 text-blue-600 text-lg">🏥</span>
+          <h2 class="text-lg font-semibold">Hospital price lookup</h2>
         </div>
-        <div id="price-results" class="mt-3 text-sm"></div>
+        <p class="text-sm text-gray-500 mb-4 ml-12">Search a hospital we've loaded, then look up what it posts for a procedure.</p>
+
+        <div class="flex gap-2 mb-3">
+          <input id="hospital-search-input" type="text" placeholder="Hospital name, e.g. Memorial Hermann"
+                 class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+          <button onclick="searchHospitals()" class="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Search</button>
+        </div>
+        <div id="hospital-results" class="text-sm mb-1 space-y-1"></div>
+
+        <div id="procedure-section" class="hidden border-t border-gray-100 pt-4 mt-4 fade-in">
+          <p class="text-sm mb-3">Selected hospital: <strong id="selected-hospital-name" class="text-blue-700"></strong></p>
+          <div class="flex gap-2">
+            <input id="procedure-input" type="text" placeholder="Procedure code or description, e.g. MRI"
+                   class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            <button onclick="lookupPrices()" class="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Look up</button>
+          </div>
+          <div id="price-results" class="mt-4 text-sm"></div>
+        </div>
       </div>
     </section>
 
     <!-- Stage 3: bill upload -->
-    <section class="mb-8 bg-white rounded-lg shadow p-4">
-      <h2 class="text-lg font-semibold mb-3">Translate your bill</h2>
-      <form id="bill-form" class="space-y-2" onsubmit="uploadBill(event)">
-        <input id="bill-file" type="file" accept="image/*,application/pdf" required class="text-sm" />
-        <input id="bill-hospital-id" type="text" placeholder="Hospital ID (optional, e.g. texas-childrens-main)"
-               class="w-full border rounded px-3 py-2 text-sm" />
-        <button type="submit" class="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700">Upload &amp; translate</button>
-      </form>
-      <div id="bill-status" class="text-sm text-gray-500 mt-2"></div>
-      <div id="bill-results" class="mt-3 space-y-3 text-sm"></div>
+    <section id="bill" class="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-violet-500 overflow-hidden">
+      <div class="p-6">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-violet-50 text-violet-600 text-lg">📄</span>
+          <h2 class="text-lg font-semibold">Translate your bill</h2>
+          <span class="text-[10px] uppercase tracking-wide bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded font-medium">Headline feature</span>
+        </div>
+        <p class="text-sm text-gray-500 mb-4 ml-12">Upload a photo or PDF of a bill and get each line item explained in plain language.</p>
+
+        <form id="bill-form" class="space-y-3" onsubmit="uploadBill(event)">
+          <label class="block border-2 border-dashed border-gray-300 rounded-lg p-4 text-center text-sm text-gray-500 hover:border-violet-400 hover:bg-violet-50/40 transition-colors cursor-pointer">
+            <input id="bill-file" type="file" accept="image/*,application/pdf" required class="text-sm w-full" />
+          </label>
+          <input id="bill-hospital-id" type="text" placeholder="Hospital ID (optional, e.g. texas-childrens-main)"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500" />
+          <button type="submit" class="bg-violet-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors">Upload &amp; translate</button>
+        </form>
+        <div id="bill-status" class="text-sm mt-3"></div>
+        <div id="bill-results" class="mt-4 space-y-3 text-sm"></div>
+      </div>
     </section>
 
     <!-- Stage 4: procedure / medication explainer -->
-    <section class="mb-8 bg-white rounded-lg shadow p-4">
-      <h2 class="text-lg font-semibold mb-3">Explain a procedure or medication</h2>
-      <div class="flex gap-2 mb-2">
-        <input id="explain-input" type="text" placeholder="e.g. lisinopril, or MRI with contrast"
-               class="flex-1 border rounded px-3 py-2 text-sm" />
-        <select id="explain-mode" class="border rounded px-2 py-2 text-sm">
-          <option value="patient">Patient</option>
-          <option value="doctor">Doctor</option>
-        </select>
-        <button onclick="explainTerm()" class="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700">Explain</button>
+    <section id="explain" class="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-emerald-500 overflow-hidden">
+      <div class="p-6">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 text-lg">💬</span>
+          <h2 class="text-lg font-semibold">Explain a procedure or medication</h2>
+        </div>
+        <p class="text-sm text-gray-500 mb-4 ml-12">Plain-language for patients, clinical detail for providers.</p>
+
+        <div class="flex flex-wrap gap-2 mb-1">
+          <input id="explain-input" type="text" placeholder="e.g. lisinopril, or MRI with contrast"
+                 class="flex-1 min-w-[200px] border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+
+          <input type="hidden" id="explain-mode" value="patient" />
+          <div class="inline-flex rounded-lg border border-gray-300 overflow-hidden text-sm">
+            <button type="button" id="mode-btn-patient" onclick="setExplainMode('patient')"
+                    class="px-3 py-2 font-medium bg-emerald-600 text-white transition-colors">Patient</button>
+            <button type="button" id="mode-btn-doctor" onclick="setExplainMode('doctor')"
+                    class="px-3 py-2 font-medium bg-white text-gray-600 hover:bg-gray-50 transition-colors">Doctor</button>
+          </div>
+
+          <button onclick="explainTerm()" class="bg-emerald-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">Explain</button>
+        </div>
+        <div id="explain-results" class="text-sm mt-3"></div>
       </div>
-      <div id="explain-results" class="text-sm"></div>
     </section>
 
-    <p class="text-xs text-gray-400 mt-12">
+    <p class="text-xs text-gray-400 text-center pt-2 pb-6">
       This tool provides general information, not medical or legal advice.
     </p>
   </main>
@@ -73,22 +122,45 @@
       return v === null || v === undefined ? "—" : "$" + Number(v).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
+    function loadingHTML(text) {
+      return `<div class="flex items-center gap-2 text-gray-500 py-1">
+        <div class="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+        <span>${text}</span>
+      </div>`;
+    }
+
+    function errorHTML(text) {
+      return `<div class="flex items-center gap-2 text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <span>⚠️</span><span>${text}</span>
+      </div>`;
+    }
+
+    function financialAssistanceHTML(note) {
+      if (!note) return "";
+      return `<div class="flex items-start gap-2 text-sm text-teal-900 bg-teal-50 border border-teal-100 rounded-lg px-3 py-2 mt-3">
+        <span>💡</span><span>${note}</span>
+      </div>`;
+    }
+
     async function searchHospitals() {
       const name = document.getElementById("hospital-search-input").value.trim();
       const resultsEl = document.getElementById("hospital-results");
-      resultsEl.textContent = "Searching...";
+      resultsEl.innerHTML = loadingHTML("Searching...");
       try {
         const res = await fetch(`/api/hospital/search?name=${encodeURIComponent(name)}`);
         const data = await res.json();
         if (!data.results || data.results.length === 0) {
-          resultsEl.innerHTML = '<p class="text-gray-500">No matching hospitals loaded.</p>';
+          resultsEl.innerHTML = '<p class="text-gray-500 py-1">No matching hospitals loaded.</p>';
           return;
         }
         resultsEl.innerHTML = data.results.map(h =>
-          `<button class="block text-left w-full px-2 py-1 rounded hover:bg-gray-100" onclick="selectHospital('${h.hospital_id}', '${h.hospital_name.replace(/'/g, "\\'")}')">${h.hospital_name} <span class="text-gray-400">(${h.hospital_id})</span></button>`
+          `<button class="block text-left w-full px-3 py-2 rounded-lg border border-transparent hover:border-blue-200 hover:bg-blue-50 transition-colors" onclick="selectHospital('${h.hospital_id}', '${h.hospital_name.replace(/'/g, "\\'")}')">
+             <span class="font-medium">${h.hospital_name}</span>
+             <span class="text-gray-400 text-xs block sm:inline sm:ml-2">${h.hospital_id}</span>
+           </button>`
         ).join("");
       } catch (e) {
-        resultsEl.innerHTML = '<p class="text-red-600">Search failed.</p>';
+        resultsEl.innerHTML = errorHTML("Search failed. Is the server running?");
       }
     }
 
@@ -99,34 +171,58 @@
       document.getElementById("selected-hospital-name").textContent = name;
       document.getElementById("procedure-section").classList.remove("hidden");
       document.getElementById("price-results").innerHTML = "";
+      document.getElementById("procedure-input").focus();
     }
 
     async function lookupPrices() {
       const procedure = document.getElementById("procedure-input").value.trim();
       const resultsEl = document.getElementById("price-results");
       if (!selectedHospitalId || !procedure) return;
-      resultsEl.textContent = "Looking up...";
+      resultsEl.innerHTML = loadingHTML("Looking up...");
       try {
         const res = await fetch(`/api/hospital/${encodeURIComponent(selectedHospitalId)}/prices?procedure=${encodeURIComponent(procedure)}`);
         const data = await res.json();
         if (!data.prices || data.prices.length === 0) {
-          resultsEl.innerHTML = '<p class="text-gray-500">No matching procedure found for this hospital.</p>';
+          resultsEl.innerHTML = '<p class="text-gray-500 py-1">No matching procedure found for this hospital.</p>';
           return;
         }
         const s = data.summary;
-        let html = `<div class="bg-gray-50 border rounded p-2 mb-2">
-          <p><strong>${s.match_count}</strong> matching item(s)</p>
-          <p>Gross charge: ${s.gross_charge_range ? money(s.gross_charge_range[0]) + " – " + money(s.gross_charge_range[1]) : "—"}</p>
-          <p>Cash price: ${s.cash_price_range ? money(s.cash_price_range[0]) + " – " + money(s.cash_price_range[1]) : "—"}</p>
-          <p>Negotiated range: ${money(s.negotiated_min)} – ${money(s.negotiated_max)}</p>
+        let html = `<div class="grid grid-cols-3 gap-2 mb-4">
+          <div class="bg-gray-50 rounded-lg p-3 text-center">
+            <div class="text-[10px] uppercase tracking-wide text-gray-400 mb-1">Gross charge</div>
+            <div class="text-sm font-semibold">${s.gross_charge_range ? money(s.gross_charge_range[0]) + " – " + money(s.gross_charge_range[1]) : "—"}</div>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 text-center">
+            <div class="text-[10px] uppercase tracking-wide text-gray-400 mb-1">Cash price</div>
+            <div class="text-sm font-semibold">${s.cash_price_range ? money(s.cash_price_range[0]) + " – " + money(s.cash_price_range[1]) : "—"}</div>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 text-center">
+            <div class="text-[10px] uppercase tracking-wide text-gray-400 mb-1">Negotiated range</div>
+            <div class="text-sm font-semibold">${money(s.negotiated_min)} – ${money(s.negotiated_max)}</div>
+          </div>
         </div>`;
-        html += data.prices.slice(0, 10).map(p =>
-          `<div class="border-b py-1"><span class="font-mono text-xs text-gray-500">${p.code || "—"}</span> ${p.description}</div>`
-        ).join("");
+        html += `<p class="text-xs text-gray-400 mb-2">${s.match_count} matching item(s)${data.prices.length > 10 ? ", showing first 10" : ""}</p>`;
+        html += '<div class="space-y-1.5">' + data.prices.slice(0, 10).map(p =>
+          `<div class="flex justify-between items-baseline gap-3 border border-gray-100 rounded-lg px-3 py-2 hover:bg-gray-50">
+             <span class="text-gray-700">${p.description}</span>
+             <span class="font-mono text-xs text-gray-400 shrink-0">${p.code || "—"}</span>
+           </div>`
+        ).join("") + '</div>';
+        html += financialAssistanceHTML(data.financial_assistance_note);
         resultsEl.innerHTML = html;
       } catch (e) {
-        resultsEl.innerHTML = '<p class="text-red-600">Lookup failed.</p>';
+        resultsEl.innerHTML = errorHTML("Lookup failed.");
       }
+    }
+
+    function setExplainMode(mode) {
+      document.getElementById("explain-mode").value = mode;
+      const patientBtn = document.getElementById("mode-btn-patient");
+      const doctorBtn = document.getElementById("mode-btn-doctor");
+      const active = "px-3 py-2 font-medium bg-emerald-600 text-white transition-colors";
+      const inactive = "px-3 py-2 font-medium bg-white text-gray-600 hover:bg-gray-50 transition-colors";
+      patientBtn.className = mode === "patient" ? active : inactive;
+      doctorBtn.className = mode === "doctor" ? active : inactive;
     }
 
     async function uploadBill(event) {
@@ -141,35 +237,37 @@
       formData.append("file", fileInput.files[0]);
       if (hospitalId) formData.append("hospital_id", hospitalId);
 
-      statusEl.textContent = "Uploading and analyzing bill... (this can take a bit)";
+      statusEl.innerHTML = loadingHTML("Uploading and analyzing bill... (this can take a bit)");
       resultsEl.innerHTML = "";
       try {
         const res = await fetch("/api/bill/upload", { method: "POST", body: formData });
         const data = await res.json();
         if (!res.ok) {
-          statusEl.textContent = "";
-          resultsEl.innerHTML = `<p class="text-red-600">${data.detail || "Upload failed."}</p>`;
+          statusEl.innerHTML = "";
+          resultsEl.innerHTML = errorHTML(data.detail || "Upload failed.");
           return;
         }
-        statusEl.textContent = "";
+        statusEl.innerHTML = "";
         if (!data.line_items || data.line_items.length === 0) {
-          resultsEl.innerHTML = '<p class="text-gray-500">No line items could be extracted from this file.</p>';
+          resultsEl.innerHTML = '<p class="text-gray-500 py-1">No line items could be extracted from this file.</p>';
           return;
         }
         resultsEl.innerHTML = data.line_items.map(item => `
-          <div class="border rounded p-3">
-            <div class="flex justify-between">
-              <span class="font-medium">${item.description || "(no description)"}</span>
-              <span>${item.charge !== null ? money(item.charge) : ""}</span>
+          <div class="border border-gray-200 rounded-xl p-4 fade-in">
+            <div class="flex justify-between items-start gap-3">
+              <div>
+                <span class="font-medium">${item.description || "(no description)"}</span>
+                ${item.code ? `<span class="ml-2 font-mono text-xs text-gray-400 bg-gray-100 rounded px-1.5 py-0.5">${item.code}</span>` : ""}
+              </div>
+              ${item.charge !== null ? `<span class="shrink-0 font-semibold bg-violet-50 text-violet-700 rounded-full px-3 py-1 text-sm">${money(item.charge)}</span>` : ""}
             </div>
-            ${item.code ? `<div class="text-xs text-gray-400 font-mono">${item.code}</div>` : ""}
-            ${item.explanation ? `<p class="text-gray-700 mt-1">${item.explanation}</p>` : ""}
-            ${item.price_narrative ? `<p class="text-blue-700 mt-1">${item.price_narrative}</p>` : ""}
+            ${item.explanation ? `<p class="text-gray-700 mt-3 leading-relaxed">${item.explanation}</p>` : ""}
+            ${item.price_narrative ? `<div class="mt-3 text-sm bg-blue-50 border border-blue-100 text-blue-900 rounded-lg px-3 py-2">${item.price_narrative}</div>` : ""}
           </div>
-        `).join("");
+        `).join("") + financialAssistanceHTML(data.financial_assistance_note);
       } catch (e) {
-        statusEl.textContent = "";
-        resultsEl.innerHTML = '<p class="text-red-600">Upload failed.</p>';
+        statusEl.innerHTML = "";
+        resultsEl.innerHTML = errorHTML("Upload failed.");
       }
     }
 
@@ -178,17 +276,20 @@
       const mode = document.getElementById("explain-mode").value;
       const resultsEl = document.getElementById("explain-results");
       if (!query) return;
-      resultsEl.textContent = "Thinking...";
+      resultsEl.innerHTML = loadingHTML("Thinking...");
       try {
         const res = await fetch(`/api/explain?query=${encodeURIComponent(query)}&mode=${mode}`);
         const data = await res.json();
         if (!res.ok) {
-          resultsEl.innerHTML = `<p class="text-red-600">${data.detail || "Explain failed."}</p>`;
+          resultsEl.innerHTML = errorHTML(data.detail || "Explain failed.");
           return;
         }
-        resultsEl.innerHTML = `<p class="text-gray-800">${data.explanation}</p><p class="text-xs text-gray-400 mt-2">${data.disclaimer}</p>`;
+        resultsEl.innerHTML = `<div class="border border-gray-200 rounded-xl p-4 fade-in">
+            <p class="text-gray-800 leading-relaxed whitespace-pre-line">${data.explanation}</p>
+            <p class="text-xs text-gray-400 mt-3 pt-3 border-t border-gray-100">${data.disclaimer}</p>
+          </div>`;
       } catch (e) {
-        resultsEl.innerHTML = '<p class="text-red-600">Explain failed.</p>';
+        resultsEl.innerHTML = errorHTML("Explain failed.");
       }
     }
   </script>

@@ -13,6 +13,15 @@ from app.services import db_service
 
 router = APIRouter()
 
+# Static note, not a real-time eligibility calculation -- most patients
+# simply don't know this option exists, so it's worth always surfacing
+# alongside a price comparison.
+FINANCIAL_ASSISTANCE_NOTE = (
+    "Many hospitals, especially nonprofits, offer financial assistance or "
+    "charity care. Ask the hospital's billing department for a financial "
+    "counselor or an ability-to-pay application."
+)
+
 
 @router.get("/search")
 def search_hospitals(name: str = ""):
@@ -44,4 +53,10 @@ def get_prices(hospital_id: str, procedure: str = ""):
             "negotiated_max": max(maxs) if maxs else None,
         }
 
-    return {"hospital_id": hospital_id, "procedure": procedure, "prices": rows, "summary": summary}
+    return {
+        "hospital_id": hospital_id,
+        "procedure": procedure,
+        "prices": rows,
+        "summary": summary,
+        "financial_assistance_note": FINANCIAL_ASSISTANCE_NOTE,
+    }

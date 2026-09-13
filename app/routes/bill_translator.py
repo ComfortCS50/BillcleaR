@@ -20,6 +20,14 @@ from app.services import db_service, gemini_service
 
 router = APIRouter()
 
+# Static note, not a real-time eligibility calculation -- most patients
+# simply don't know this option exists, so it's worth always surfacing.
+FINANCIAL_ASSISTANCE_NOTE = (
+    "Many hospitals, especially nonprofits, offer financial assistance or "
+    "charity care. Ask the hospital's billing department for a financial "
+    "counselor or an ability-to-pay application."
+)
+
 
 def _price_match(hospital_id: str, code, description: str) -> Optional[dict]:
     lookup_term = (code or description or "").strip()
@@ -91,4 +99,5 @@ async def upload_bill(
         "hospital_id": hospital_id,
         "line_items": line_items,
         "disclaimer": "This is general information, not medical or billing advice.",
+        "financial_assistance_note": FINANCIAL_ASSISTANCE_NOTE,
     }
